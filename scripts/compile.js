@@ -23,6 +23,8 @@ const compile = () =>
 if (existsSync(outputPath)) {
   const output = readFileSync(outputPath, "utf-8");
   const hash = output.slice(3, 35);
+  console.log(`Old source hash: ${hash}`);
+  console.log(`New source hash: ${grammarHash}`);
   if (hash === grammarHash) {
     console.log("Parser: Nothing to do.");
   } else {
