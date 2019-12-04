@@ -133,7 +133,7 @@ registerDecorator("tag", {
   },
 });
 
-const results = [];
+let results = [];
 const treeStack = [];
 
 function tree(t) {
@@ -210,7 +210,7 @@ function node(t) {
 }
 
 function braceList(xs) {
-  return `{${xs.length === 0 ? ` ${xs.join(", ")} ` : " "}}`;
+  return `{${xs.length === 0 ? " " : ` ${xs.join(", ")} `}}`;
 }
 
 function visitImport(t) {
@@ -238,7 +238,7 @@ function visitImport(t) {
       }
     }
   } else if (transpilerOptions.module === "esmodule") {
-    const tail = ` "${t.module}"`;
+    const tail = ` "${t.module}";`;
     if (t.body === null) {
       s = `import${tail}`;
     } else if (t.body.kind === "default") {
@@ -288,4 +288,8 @@ function assemble() {
 module.exports.transpile = function transpile(t) {
   t.decls.forEach(visitDecl);
   return assemble();
+};
+
+module.exports.reset = function reset() {
+  results = [];
 };

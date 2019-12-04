@@ -10,7 +10,7 @@ TopLevelDeclaration
   / TreeDeclaration
 
 ImportDeclaration
-  = "import" ws body:ImportBody? ws module:string
+  = "import" ws body:(x:ImportBody ws "from" ws { return x; })? module:string
     { return { kind: "import", body, module }; }
 
 ImportBody
@@ -22,8 +22,8 @@ ImportBody
     { return { kind: "bindings", bindings }; }
 
 NameBinding
-  = name:Identifier newName:(ws "as" ws x:Identifier { return x; })
-    { return newName ? [name, null] : [name, newName]; }
+  = name:Identifier newName:(ws "as" ws x:Identifier { return x; })?
+    { return [name, newName]; }
 
 TreeDeclaration
   = cs:DecoratorChain?
@@ -112,15 +112,15 @@ Decorator
 // Identifier
 // ==========
 
-PascalCaseIdentifier
+PascalCaseIdentifier "PascalCase identifier"
   = [A-Z][A-Za-z0-9_]*
     { return text(); }
 
-CamelCaseIdentifier
+CamelCaseIdentifier "camelCase identifier"
   = [a-z][A-Za-z0-9_]*
     { return text(); }
 
-Identifier
+Identifier "identifier"
   = [a-zA-Z_][a-zA-Z0-9_]*
     { return text(); }
 
