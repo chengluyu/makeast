@@ -6,9 +6,10 @@ SourceFile
     }
 
 TreeDeclaration
-  = "tree" ws name:PascalCaseIdentifier ws
+  = cs:DecoratorChain?
+    "tree" ws name:PascalCaseIdentifier ws
     "{" ws decls:List__TreeSubDeclaration ws "}"
-    { return { kind: "tree", name, decls, root: false }; }
+    { return { kind: "tree", name, decorators: cs || [], decls, root: false }; }
 
 TreeSubDeclaration
   = TreeDeclaration
@@ -17,22 +18,25 @@ TreeSubDeclaration
   / PropertyDeclaration
 
 UnionDeclaration
-  = "union" ws name:PascalCaseIdentifier ws
+  = cs:DecoratorChain?
+    "union" ws name:PascalCaseIdentifier ws
     "{" ws decls:List__UnionSubDeclaration ws "}"
-    { return { kind: "union", name, decls }; }
+    { return { kind: "union", name, decorators: cs || [], decls }; }
 
 UnionSubDeclaration
   = TreeDeclaration
   / NodeDeclaration
 
 NodeDeclaration
-  = "node" ws name:PascalCaseIdentifier ws
+  = cs:DecoratorChain?
+    "node" ws name:PascalCaseIdentifier ws
     decls:("{" ws ds:List__PropertyDeclaration ws "}" { return ds; })?
-    { return { kind: "node", name, decls: decls || [] }; }
+    { return { kind: "node", name, decorators: cs || [], decls: decls || [] }; }
 
 PropertyDeclaration
-  = name:CamelCaseIdentifier ws ":" ws type:Type
-    { return { kind: "prop", name, type }; }
+  = cs:DecoratorChain?
+    name:CamelCaseIdentifier ws ":" ws type:Type
+    { return { kind: "prop", name, decorators: cs || [], type }; }
 
 Type
   = head:PostfixType tail:(ws "|" ws item:PostfixType { return item; })*
@@ -74,6 +78,17 @@ TypeName
   / "string"
   / PascalCaseIdentifier
 
+// Decorator
+// =========
+
+DecoratorChain
+  = head:Decorator ws tail:(item:Decorator ws { return item; })*
+    { return [head].concat(tail); }
+
+Decorator
+  = "@" name:CamelCaseIdentifier "(" ws args:List__JSON_text? ws ")"
+    { return { kind: "decorator", name, args: args || [] }; }
+
 // Identifier
 // ==========
 
@@ -106,6 +121,11 @@ List__UnionSubDeclaration
 List__PropertyDeclaration
   = head:PropertyDeclaration
     tail:(ws item:PropertyDeclaration { return item; })*
+    { return [head].concat(tail); }
+
+List__JSON_text
+  = head:JSON_text
+    tail:(ws "," ws item:JSON_text { return item; })*
     { return [head].concat(tail); }
 
 // JSON Grammar

@@ -5,6 +5,24 @@ function separateProps(ts) {
   return [props, nonProps];
 }
 
+function bipartite(xs, pred) {
+  const yes = [];
+  const no = [];
+  xs.forEach(x => (pred(x) ? yes : no).push(x));
+  return [yes, no];
+}
+
+// TODO: Respect options here
+const transpilerOptions = {
+  treatEmptyTreeAsUnion: true,
+
+  style: {
+    tabWidth: 2,
+    useTab: false,
+    printWidth: 120,
+  },
+};
+
 const typePower = {
   union: 1,
   array: 2,
@@ -44,15 +62,107 @@ function visitType(t, parentPower = 0) {
   return myPower < parentPower ? `(${s})` : s;
 }
 
+const decoratorRegistry = new Map();
+
+function registerDecorator(name, options) {
+  if (decoratorRegistry.has(name)) {
+    throw new Error(`duplicated decorator name ${name}`);
+  }
+  decoratorRegistry.set(name, options);
+}
+
+function getDecorator(name) {
+  const d = decoratorRegistry.get(name);
+  if (d === undefined) {
+    throw new Error(`unknown decorator ${name}`);
+  }
+  return d;
+}
+
+function isApplicable(d, t) {
+  return Array.isArray(d.applicable)
+    ? d.applicable.find(t.kind) !== undefined
+    : d.applicable === t.kind || d.applicable === "all";
+}
+
+module.exports.registerDecorator = registerDecorator;
+
+// Built-in decorators
+registerDecorator("readonly", {
+  applicable: "prop",
+  target: "source",
+  handler() {
+    return x => `readonly ${x}`;
+  },
+});
+
+registerDecorator("tag", {
+  // This decorator is only applicable to tree declarations.
+  applicable: "tree",
+  // This decorator is aiming to modify the node.
+  target: "node",
+  handler(propName, enumTypeName) {
+    const nodeNames = [];
+
+    function traverse(t) {
+      if (t.kind === "node") {
+        t.decls.unshift({
+          kind: "prop",
+          decorators: [],
+          name: propName,
+          type: `${enumTypeName}.${t.name}`,
+        });
+        return nodeNames.push(t.name);
+      }
+      t.decls.forEach(traverse);
+    }
+
+    // If you'll use the context, you can't use arrow function.
+    return function(root) {
+      traverse(root);
+      const first = `export enum ${enumTypeName} {`;
+      const last = "}";
+      this.results.push({
+        type: "source",
+        source:
+          nodeNames.length === 0
+            ? first + last
+            : [first, ...nodeNames.map(x => `  ${x},`), last].join("\n"),
+      });
+    };
+  },
+});
+
 const results = [];
 const treeStack = [];
 
 function tree(t) {
+  // Apply decorators
+  // Why can't I use for-of loop here?
+  t.decorators = [...t.decorators];
+  for (const { name, args } of t.decorators) {
+    const decorator = getDecorator(name);
+    if (!isApplicable(decorator, t)) {
+      throw new Error(`expect a decorator applicable to tree declarations`);
+    }
+    if (decorator.target === "node") {
+      const f = decorator.handler(...args);
+      f.call({ results }, t); // TODO: encapsulation
+    } else {
+      throw new Error(`unknown target ${decorator.target} for a tree declaration`);
+    }
+  }
+  // Transpile
   const [props, nonProps] = separateProps(t.decls);
-  node({ name: t.name, decls: props });
-  treeStack.unshift(t.name);
-  nonProps.forEach(visitDecl);
-  treeStack.shift();
+  if (props.length === 0) {
+    // Treat as union if the tree doesn't have own properties
+    union({ name: t.name, decls: nonProps });
+  } else {
+    node({ name: t.name, decls: props });
+    treeStack.unshift(t.name);
+    nonProps.forEach(visitDecl);
+    treeStack.shift();
+  }
 }
 
 function union(t) {
@@ -61,6 +171,29 @@ function union(t) {
     type: "source",
     source: `type ${t.name} = ${t.decls.map(u => u.name).join(" | ")};`,
   });
+}
+
+function visitProp(t) {
+  const byTarget = { name: [], type: [], source: [] };
+  for (const { name, args } of t.decorators) {
+    const d = getDecorator(name);
+    if (
+      Array.isArray(d.applicable)
+        ? d.applicable.find(t.kind) !== undefined
+        : d.applicable === t.kind || d.applicable === "all"
+    ) {
+      if (d.target in byTarget) {
+        byTarget[d.target].push(d.handler(...args));
+      } else {
+        throw new Error(`unknown target ${d.target} for a property decorator`);
+      }
+    } else {
+      throw new Error(`expect a decorator applicable to property declarations`);
+    }
+  }
+  const name = byTarget.name.reduce((x, f) => f(x), t.name);
+  const type = byTarget.type.reduce((x, f) => f(x), t.type);
+  return byTarget.source.reduce((x, f) => f(x), `${name}: ${visitType(type)}`);
 }
 
 function node(t) {
@@ -72,7 +205,7 @@ function node(t) {
     source:
       t.decls.length === 0
         ? first + last
-        : [first, ...t.decls.map(u => `  ${u.name}: ${visitType(u.type)};`), last].join("\n"),
+        : [first, ...t.decls.map(u => `  ${visitProp(u)};`), last].join("\n"),
   });
 }
 
@@ -98,7 +231,7 @@ function assemble() {
       throw new Error(`unknown block type ${t.type}`);
     }
   }
-  return blocks.join("\n\n\n");
+  return blocks.join("\n\n");
 }
 
 module.exports.transpile = function transpile(t) {

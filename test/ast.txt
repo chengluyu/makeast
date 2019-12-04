@@ -1,3 +1,4 @@
+@tag("kind", "SyntaxTreeKind")
 tree SyntaxTreeNode {
   node Token {
     text: string

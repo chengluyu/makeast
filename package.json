@@ -4,7 +4,7 @@
   "description": "A general JavaScript/TypeScript abstract syntax tree generation.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "node scripts/compile && jest"
   },
   "repository": {
     "type": "git",
