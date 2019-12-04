@@ -22,5 +22,9 @@ describe("Transpiler Test", () => {
       .split("\n")
       .filter(x => x);
     expect(outputLines).toEqual(inputLines);
+    reset();
+    const source3 = loadTestCaseInput("arithmetic.txt");
+    const ast3 = parse(source3);
+    console.log(transpile(ast3));
   });
 });

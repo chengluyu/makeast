@@ -1,0 +1,21 @@
+@tag("kind", "SyntaxTreeKind")
+tree SyntaxTreeNode {
+  node Token {
+    #readonly text: string
+  }
+  tree Expression {
+    node BinaryExpression {
+      #readonly operator: Token
+      #readonly left: Expression
+      #readonly right: Expression
+    }
+    node UnaryExpression {
+      #readonly operator: Token
+      #readonly operand: Expression
+    }
+    node NumericLiteral {
+      #readonly raw: string
+      #readonly parsed: number
+    }
+  }
+}
