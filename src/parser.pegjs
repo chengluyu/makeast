@@ -1,3 +1,22 @@
+{
+  function attach(t, attachments) {
+    const attributes = {};
+    const decorators = [];
+    for (const a of attachments) {
+      if (a.kind === "attribute") {
+        attributes[a.name] = a.value;
+      } else if (a.kind === "decorator") {
+        decorators.push(a);
+      } else {
+        throw new Error(`unknown attachment kind ${a.kind}`);
+      }
+    }
+    t.attributes = attributes;
+    t.decorators = decorators;
+    return t;
+  }
+}
+
 SourceFile
   = ws decls:List__TreeDeclaration ws
     {
@@ -6,10 +25,10 @@ SourceFile
     }
 
 TreeDeclaration
-  = cs:DecoratorChain?
+  = cs:List__Attachment?
     "tree" ws name:PascalCaseIdentifier ws
     "{" ws decls:List__TreeSubDeclaration ws "}"
-    { return { kind: "tree", name, decorators: cs || [], decls, root: false }; }
+    { return attach({ kind: "tree", name, decls, root: false }, cs || []); }
 
 TreeSubDeclaration
   = TreeDeclaration
@@ -18,25 +37,25 @@ TreeSubDeclaration
   / PropertyDeclaration
 
 UnionDeclaration
-  = cs:DecoratorChain?
+  = cs:List__Attachment?
     "union" ws name:PascalCaseIdentifier ws
     "{" ws decls:List__UnionSubDeclaration ws "}"
-    { return { kind: "union", name, decorators: cs || [], decls }; }
+    { return attach({ kind: "union", name, decls }, cs || []); }
 
 UnionSubDeclaration
   = TreeDeclaration
   / NodeDeclaration
 
 NodeDeclaration
-  = cs:DecoratorChain?
+  = cs:List__Attachment?
     "node" ws name:PascalCaseIdentifier ws
     decls:("{" ws ds:List__PropertyDeclaration ws "}" { return ds; })?
-    { return { kind: "node", name, decorators: cs || [], decls: decls || [] }; }
+    { return attach({ kind: "node", name, decls: decls || [] }, cs || []); }
 
 PropertyDeclaration
-  = cs:DecoratorChain?
+  = cs:List__Attachment?
     name:CamelCaseIdentifier ws ":" ws type:Type
-    { return { kind: "prop", name, decorators: cs || [], type }; }
+    { return attach({ kind: "prop", name, type }, cs || []); }
 
 Type
   = head:PostfixType tail:(ws "|" ws item:PostfixType { return item; })*
@@ -81,11 +100,15 @@ TypeName
 // Decorator
 // =========
 
-DecoratorChain
-  = head:Decorator ws tail:(item:Decorator ws { return item; })*
-    { return [head].concat(tail); }
+Attachment
+  = Attribute
+  / Decorator
+  
+Attribute
+  = "#" name:CamelCaseIdentifier "=" value:JSON_text
+    { return { kind: "attribute", name, value }; }
 
-Decorator
+Decorator 
   = "@" name:CamelCaseIdentifier "(" ws args:List__JSON_text? ws ")"
     { return { kind: "decorator", name, args: args || [] }; }
 
@@ -126,6 +149,10 @@ List__PropertyDeclaration
 List__JSON_text
   = head:JSON_text
     tail:(ws "," ws item:JSON_text { return item; })*
+    { return [head].concat(tail); }
+
+List__Attachment
+  = head:Attachment ws tail:(item:Attachment ws { return item; })*
     { return [head].concat(tail); }
 
 // JSON Grammar
