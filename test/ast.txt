@@ -1,3 +1,5 @@
+import "test"
+
 @tag("kind", "SyntaxTreeKind")
 tree SyntaxTreeNode {
   node Token {

@@ -18,11 +18,31 @@
 }
 
 SourceFile
-  = ws decls:List__TreeDeclaration ws
+  = ws decls:List__TopLevelDeclaration ws
     {
       decls.forEach(d => (d.root = true));
       return { kind: "source", decls };
     }
+
+TopLevelDeclaration
+  = ImportDeclaration
+  / TreeDeclaration
+
+ImportDeclaration
+  = "import" ws body:(x:ImportBody ws "from" ws { return x; })? module:string
+    { return { kind: "import", body, module }; }
+
+ImportBody
+  = defaultName:Identifier
+    { return { kind: "default", defaultName }; }
+  / "*" ws "as" ws name:Identifier
+    { return { kind: "namespace", name }; }
+  / "{" ws bindings:CommaList__NameBinding ws "}"
+    { return { kind: "bindings", bindings }; }
+
+NameBinding
+  = name:Identifier newName:(ws "as" ws x:Identifier { return x; })?
+    { return [name, newName]; }
 
 TreeDeclaration
   = cs:List__Attachment?
@@ -115,20 +135,24 @@ Decorator
 // Identifier
 // ==========
 
-PascalCaseIdentifier
+PascalCaseIdentifier "PascalCase identifier"
   = [A-Z][A-Za-z0-9_]*
     { return text(); }
 
-CamelCaseIdentifier
+CamelCaseIdentifier "camelCase identifier"
   = [a-z][A-Za-z0-9_]*
+    { return text(); }
+
+Identifier "identifier"
+  = [a-zA-Z_][a-zA-Z0-9_]*
     { return text(); }
 
 // List
 // ====
 
-List__TreeDeclaration
-  = head:TreeDeclaration
-    tail:(ws item:TreeDeclaration { return item; })*
+List__TopLevelDeclaration
+  = head:TopLevelDeclaration
+    tail:(ws item:TopLevelDeclaration { return item; })*
     { return [head].concat(tail); }
 
 List__TreeSubDeclaration
@@ -153,6 +177,11 @@ List__JSON_text
 
 List__Attachment
   = head:Attachment ws tail:(item:Attachment ws { return item; })*
+    { return [head].concat(tail); }
+
+CommaList__NameBinding
+  = head:NameBinding
+    tail:(ws "," ws item:NameBinding { return item; })*
     { return [head].concat(tail); }
 
 // JSON Grammar
