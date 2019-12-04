@@ -1,11 +1,3 @@
-const { parse, SyntaxError } = require("./parser");
-const path = require("path");
-const { readFileSync } = require("fs");
-
-function buildErrorMessage(e) {
-  return `ParseError: Line ${e.location.start.line}, column ${e.location.start.column}: ${e.message}`;
-}
-
 function separateProps(ts) {
   const props = [],
     nonProps = [];
@@ -56,9 +48,9 @@ const results = [];
 const treeStack = [];
 
 function tree(t) {
-  treeStack.unshift(t.name);
   const [props, nonProps] = separateProps(t.decls);
   node({ name: t.name, decls: props });
+  treeStack.unshift(t.name);
   nonProps.forEach(visitDecl);
   treeStack.shift();
 }
@@ -97,7 +89,7 @@ function visitDecl(t) {
   throw new Error(`unknown node kind ${t.kind}`);
 }
 
-function output() {
+function assemble() {
   const blocks = [];
   for (const t of results) {
     if (t.type === "source") {
@@ -109,15 +101,7 @@ function output() {
   return blocks.join("\n\n\n");
 }
 
-try {
-  const source = readFileSync(path.join(__dirname, "tree.ast"), "utf-8");
-  const ast = parse(source);
-  ast.decls.forEach(visitDecl);
-  console.log(output());
-} catch (e) {
-  if (e instanceof SyntaxError) {
-    console.log(buildErrorMessage(e));
-  } else {
-    console.log(e.stack);
-  }
-}
+module.exports.transpile = function transpile(t) {
+  t.decls.forEach(visitDecl);
+  return assemble();
+};

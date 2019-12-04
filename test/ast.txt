@@ -1,0 +1,73 @@
+tree SyntaxTreeNode {
+  node Token {
+    text: string
+  }
+  tree Declaration {
+    node PropertyDeclaration {
+      name: string
+      value: Expression
+    }
+    node MemberDeclaration {
+      name: string
+      body: Expression
+    }
+    node ConstraintDeclaration {
+      strength: Token
+      leftMostExpression: ConstraintExpression
+      rightExpressions: (node ConstraintRightHandSide {
+        relation: Token
+        expression: ConstraintExpression
+      })[]
+    }
+  }
+  tree ConstraintExpression {
+    node ConstraintBinaryExpression {
+      operator: Token
+      left: ConstraintExpression
+      right: ConstraintExpression
+    }
+    node ConstraintUnaryExpression {
+      operator: Token
+      operand: ConstraintExpression
+    }
+    node ConstraintCallExpression {
+      expression: Identifier
+      arguments: ConstraintExpression[]
+    }
+  }
+  tree Expression {
+    node BinaryExpression {
+      operator: Token
+      left: Expression
+      right: Expression
+    }
+    node UnaryExpression {
+      operator: Token
+      operand: Expression
+    }
+    node ElementLiteral {
+      type: string
+      properties: PropertyDeclaration[]
+      members: MemberDeclaration[]
+      constraints: ConstraintDeclaration[]
+    }
+    union Literal {
+      node TrueLiteral
+      node FalseLiteral
+      node NumericLiteral {
+        raw: string
+        parsed: number
+      }
+      node StringLiteral {
+        raw: string
+        parsed: string
+      }
+      node ArrayLiteral {
+        elements: Literal[]
+      }
+      node TupleLiteral {
+        elements: Literal[]
+      }
+    }
+  }
+}
