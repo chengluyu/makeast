@@ -88,26 +88,19 @@ function isApplicable(d, t) {
 module.exports.registerDecorator = registerDecorator;
 
 // Built-in decorators
-registerDecorator("readonly", {
-  applicable: "prop",
-  target: "source",
-  handler() {
-    return x => `readonly ${x}`;
-  },
-});
-
 registerDecorator("tag", {
   // This decorator is only applicable to tree declarations.
   applicable: "tree",
   // This decorator is aiming to modify the node.
   target: "node",
-  handler(propName, enumTypeName) {
+  handler(propName, enumTypeName, options = { readonly: true }) {
     const nodeNames = [];
 
     function traverse(t) {
       if (t.kind === "node") {
         t.decls.unshift({
           kind: "prop",
+          attributes: { readonly: options.readonly },
           decorators: [],
           name: propName,
           type: `${enumTypeName}.${t.name}`,
@@ -193,7 +186,21 @@ function visitProp(t) {
   }
   const name = byTarget.name.reduce((x, f) => f(x), t.name);
   const type = byTarget.type.reduce((x, f) => f(x), t.type);
-  return byTarget.source.reduce((x, f) => f(x), `${name}: ${visitType(type)}`);
+  let s = byTarget.source.reduce((x, f) => f(x), `${name}: ${visitType(type)}`);
+  // Readonly
+  if (t.attributes.readonly) {
+    s = `readonly ${s}`;
+  }
+  // Visibility
+  const v = t.attributes.visibility;
+  if (typeof v === "string") {
+    if (v === "public" || v === "private") {
+      s = `${v} ${s}`;
+    } else {
+      throw Error(`unknown property visibility ${v}`);
+    }
+  }
+  return s;
 }
 
 function node(t) {

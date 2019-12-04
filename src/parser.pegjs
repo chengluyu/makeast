@@ -125,8 +125,8 @@ Attachment
   / Decorator
   
 Attribute
-  = "#" name:CamelCaseIdentifier "=" value:JSON_text
-    { return { kind: "attribute", name, value }; }
+  = "#" name:CamelCaseIdentifier value:("=" x:JSON_text { return x; })?
+    { return { kind: "attribute", name, value: value || true }; }
 
 Decorator 
   = "@" name:CamelCaseIdentifier "(" ws args:List__JSON_text? ws ")"
