@@ -1,4 +1,4 @@
-# Astgen
+# Astgen <img align="right" src="docs/logo.svg" height="38"></img>
 
 Astgen is a transpiler that helps you quickly generate abstract syntax tree classes and interfaces in JavaScript/TypeScript.
 
