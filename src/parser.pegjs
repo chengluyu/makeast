@@ -1,9 +1,29 @@
 SourceFile
-  = ws decls:List__TreeDeclaration ws
+  = ws decls:List__TopLevelDeclaration ws
     {
       decls.forEach(d => (d.root = true));
       return { kind: "source", decls };
     }
+
+TopLevelDeclaration
+  = ImportDeclaration
+  / TreeDeclaration
+
+ImportDeclaration
+  = "import" ws body:ImportBody? ws module:string
+    { return { kind: "import", body, module }; }
+
+ImportBody
+  = defaultName:Identifier
+    { return { kind: "default", defaultName }; }
+  / "*" ws "as" ws name:Identifier
+    { return { kind: "namespace", name }; }
+  / "{" ws bindings:CommaList__NameBinding ws "}"
+    { return { kind: "bindings", bindings }; }
+
+NameBinding
+  = name:Identifier newName:(ws "as" ws x:Identifier { return x; })
+    { return newName ? [name, null] : [name, newName]; }
 
 TreeDeclaration
   = cs:DecoratorChain?
@@ -100,12 +120,16 @@ CamelCaseIdentifier
   = [a-z][A-Za-z0-9_]*
     { return text(); }
 
+Identifier
+  = [a-zA-Z_][a-zA-Z0-9_]*
+    { return text(); }
+
 // List
 // ====
 
-List__TreeDeclaration
-  = head:TreeDeclaration
-    tail:(ws item:TreeDeclaration { return item; })*
+List__TopLevelDeclaration
+  = head:TopLevelDeclaration
+    tail:(ws item:TopLevelDeclaration { return item; })*
     { return [head].concat(tail); }
 
 List__TreeSubDeclaration
@@ -126,6 +150,11 @@ List__PropertyDeclaration
 List__JSON_text
   = head:JSON_text
     tail:(ws "," ws item:JSON_text { return item; })*
+    { return [head].concat(tail); }
+
+CommaList__NameBinding
+  = head:NameBinding
+    tail:(ws "," ws item:NameBinding { return item; })*
     { return [head].concat(tail); }
 
 // JSON Grammar

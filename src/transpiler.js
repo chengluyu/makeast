@@ -15,7 +15,7 @@ function bipartite(xs, pred) {
 // TODO: Respect options here
 const transpilerOptions = {
   treatEmptyTreeAsUnion: true,
-
+  module: "esmodule", // or "commonjs"
   style: {
     tabWidth: 2,
     useTab: false,
@@ -209,6 +209,54 @@ function node(t) {
   });
 }
 
+function braceList(xs) {
+  return `{${xs.length === 0 ? ` ${xs.join(", ")} ` : " "}}`;
+}
+
+function visitImport(t) {
+  let s;
+  if (transpilerOptions.module === "commonjs") {
+    const temp = "_" + t.module.replace(/[^a-zA-Z0-9_]/g, "");
+    const tail = ` = require("${t.module}");`;
+    if (t.body === null) {
+      s = `const ${temp}${tail}`;
+    } else if (t.body.kind === "default") {
+      s = `const ${t.body.defaultName}${tail});`;
+    } else if (t.body.kind === "namespace") {
+      s = `const ${t.body.name}${tail})`;
+    } else if (t.body.kind === "bindings") {
+      const [keepName, rename] = bipartite(t.body.bindings, b => b[1] === null);
+      // If there exists at least one rename binding
+      if (rename.length === 0) {
+        s = `const ${braceList(keepName)}${tail})`;
+      } else {
+        s = [
+          `const ${temp}${tail}`,
+          `const ${braceList(keepName)} = ${temp};`,
+          ...rename.map(([name, alias]) => `const ${alias} = ${temp}.${name};`),
+        ].join("\n");
+      }
+    }
+  } else if (transpilerOptions.module === "esmodule") {
+    const tail = ` "${t.module}"`;
+    if (t.body === null) {
+      s = `import${tail}`;
+    } else if (t.body.kind === "default") {
+      s = `import ${t.body.defaultName} from${tail}`;
+    } else if (t.body.kind === "namespace") {
+      s = `import * as ${t.body.name} from${tail}`;
+    } else if (t.body.kind === "bindings") {
+      const items = t.body.bindings.map(([name, newName]) =>
+        newName === null ? name : `${name} as ${newName}`
+      );
+      s = `import ${braceList(items)} from${tail}`;
+    }
+  } else {
+    throw new Error(`unknown module type: ${transpilerOptions.module}`);
+  }
+  results.push({ type: "source", source: s });
+}
+
 function visitDecl(t) {
   if (t.kind === "tree") {
     return tree(t);
@@ -218,6 +266,9 @@ function visitDecl(t) {
   }
   if (t.kind === "node") {
     return node(t);
+  }
+  if (t.kind === "import") {
+    return visitImport(t);
   }
   throw new Error(`unknown node kind ${t.kind}`);
 }
