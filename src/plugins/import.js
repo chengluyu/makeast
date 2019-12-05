@@ -1,12 +1,10 @@
+const { braceList } = require("../utils");
+
 function bipartite(xs, pred) {
   const yes = [];
   const no = [];
   xs.forEach(x => (pred(x) ? yes : no).push(x));
   return [yes, no];
-}
-
-function braceList(xs) {
-  return `{${xs.length === 0 ? " " : ` ${xs.join(", ")} `}}`;
 }
 
 function visitImport(t) {

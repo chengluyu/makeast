@@ -1,11 +1,5 @@
 const TypeVisitor = require("../type");
-
-function separateProps(ts) {
-  const props = [],
-    nonProps = [];
-  ts.forEach(t => (t.kind === "prop" ? props : nonProps).push(t));
-  return [props, nonProps];
-}
+const { separateProps } = require("../utils");
 
 class InterfaceGenerator {
   constructor(context) {
