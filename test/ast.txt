@@ -1,6 +1,5 @@
-import "test"
-
 @tag("kind", "SyntaxTreeKind")
+@factory("SyntaxTreeFactory")
 tree SyntaxTreeNode {
   node Token {
     text: string
