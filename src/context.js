@@ -78,7 +78,7 @@ module.exports = class Context {
   }
 
   reset() {
-    this.result = [];
+    this.results = [];
   }
 
   assemble() {
