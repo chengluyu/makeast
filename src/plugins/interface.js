@@ -90,8 +90,10 @@ module.exports = {
   target: "node",
   handler() {
     return function(t) {
-      const gen = new InterfaceGenerator(this);
-      gen.visit(t);
+      if (t.root) {
+        const gen = new InterfaceGenerator(this);
+        gen.visit(t);
+      }
     };
   },
 };
