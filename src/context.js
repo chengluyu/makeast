@@ -60,6 +60,10 @@ module.exports = class Context {
   }
 
   traverse(t) {
+    // Apply explicitly declared decorators
+    for (const { name, args } of t.decorators) {
+      this.applyDecorator(t, name, args);
+    }
     // Apply default decorators
     for (const { name, argsOrFn } of this.defaultDecorators[t.kind]) {
       if (typeof argsOrFn === "function") {
@@ -67,10 +71,6 @@ module.exports = class Context {
       } else {
         this.applyDecorator(t, name, argsOrFn);
       }
-    }
-    // Apply explicitly declared decorators
-    for (const { name, args } of t.decorators) {
-      this.applyDecorator(t, name, args);
     }
     if (Array.isArray(t.decls)) {
       t.decls.forEach(this.traverse);
