@@ -30,7 +30,7 @@ TopLevelDeclaration
 
 ImportDeclaration
   = "import" ws body:(x:ImportBody ws "from" ws { return x; })? module:string
-    { return { kind: "import", body, module }; }
+    { return { kind: "import", body, module, decorators: [] }; }
 
 ImportBody
   = defaultName:Identifier

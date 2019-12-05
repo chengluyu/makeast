@@ -44,7 +44,7 @@ tree SyntaxTreeNode {
     }
     node CallExpression {
       #readonly callee: Identifier
-      #factoryParameterName="args" #readonly arguments: Expression[]
+      #readonly arguments: Expression[]
     }
     node ArrayLiteral {
       elements: Expression[]
@@ -52,7 +52,7 @@ tree SyntaxTreeNode {
     node TupleLiteral {
       elements: Expression[]
     }
-    name NamedTupleLiteral {
+    node NamedTupleLiteral {
       properties: PropertyDeclaration[]
     }
     node TrueLiteral
