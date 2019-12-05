@@ -97,6 +97,9 @@ registerDecorator("tag", {
     const nodeNames = [];
 
     function traverse(t) {
+      if (t.kind === "prop") {
+        return;
+      }
       if (t.kind === "node") {
         t.decls.unshift({
           kind: "prop",

@@ -26,5 +26,9 @@ describe("Transpiler Test", () => {
     const source3 = loadTestCaseInput("arithmetic.txt");
     const ast3 = parse(source3);
     console.log(transpile(ast3));
+    reset();
+    const source4 = loadTestCaseInput("element.txt");
+    const ast4 = parse(source4);
+    console.log(transpile(ast4));
   });
 });

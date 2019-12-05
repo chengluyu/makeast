@@ -1,0 +1,73 @@
+@tag("kind", "SyntaxTreeKind")
+tree SyntaxTreeNode {
+  start: Location
+  end: Location
+
+  node Token {
+    #readonly text: string
+  }
+
+  node Identifier {
+    #readonly text: string
+  }
+
+  tree Declaration {
+    node PropertyDeclaration {
+      name: string
+      value: Expression
+    }
+  
+    node MemberDeclaration {
+      name: string
+      body: Expression
+    }
+
+    node ConstraintDeclaration {
+      strength: Identifier
+      leftMostExpression: ConstraintExpression
+      rightExpressions: node ConstraintRightHandSide {
+        relation: Token
+        expression: ConstraintExpression
+      }
+    }
+  }
+
+  tree Expression {
+    node BinaryExpression {
+      operator: Token
+      left: Expression
+      right: Expression
+    }
+    node UnaryExpression {
+      #readonly operator: Token
+      #readonly operand: Expression
+    }
+    node CallExpression {
+      #readonly callee: Identifier
+      #factoryParameterName="args" #readonly arguments: Expression[]
+    }
+    node ArrayLiteral {
+      elements: Expression[]
+    }
+    node TupleLiteral {
+      elements: Expression[]
+    }
+    name NamedTupleLiteral {
+      properties: PropertyDeclaration[]
+    }
+    node TrueLiteral
+    node FalseLiteral
+    node NumericLiteral {
+      #readonly raw: string
+      #readonly parsed: number
+    }
+    node StringLiteral {
+      #readonly raw: string
+      #readonly parsed: string
+    }
+    node LambdaExpression {
+      #readonly parameters: Identifier[]
+      #readonly body: Expression
+    }
+  }
+}
