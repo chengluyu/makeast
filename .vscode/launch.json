@@ -7,11 +7,16 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
+      "name": "Jest Tests",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": [
+        "-i"
       ],
-      "program": "${workspaceFolder}/src/index.test.js"
+      "preLaunchTask": "build",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceRoot}/node_modules/**"
+      ],
     }
   ]
 }
