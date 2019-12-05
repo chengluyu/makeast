@@ -19,10 +19,10 @@ const defaultOptions = {
 };
 
 module.exports = class Context {
-  constructor(options) {
+  constructor(options = {}) {
     this.results = [];
     this.decoratorRegistry = new Map();
-    this.options = merge(options, defaultOptions);
+    this.options = merge(defaultOptions, options);
     this.traverse = this.traverse.bind(this);
     this.defaultDecorators = { node: [], prop: [], tree: [], import: [], union: [] };
   }

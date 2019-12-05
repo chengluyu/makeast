@@ -72,9 +72,6 @@ module.exports = {
     }
 
     let traverse = function(t) {
-      if (t.kind === "prop") {
-        return;
-      }
       if (t.kind === "node") {
         factoryMethods.push(generateFactoryMethod.call(this, t, inheritedProps));
       } else if (t.kind === "tree") {

@@ -4,18 +4,27 @@ tree SyntaxTreeNode {
   node Token {
     #readonly text: string
   }
+  node Identifier {
+    #readonly text: string
+  }
   tree Expression {
     node BinaryExpression {
-      #readonly operator: Token
-      #readonly left: Expression
-      #readonly right: Expression
+      operator: Token
+      left: Expression
+      right: Expression
     }
     node UnaryExpression {
-      #readonly operator: Token
-      #readonly operand: Expression
+      operator: Token
+      operand: Expression
+    }
+    node FunctionApplication {
+      functionName: Identifier
+      #factory={"parameterName": "args"}
+      arguments: Expression[]
     }
     node NumericLiteral {
       #readonly raw: string
+      #factory={"hideFromParameters": true, "defaultValue": "parseFloat(raw)"}
       #readonly parsed: number
     }
   }

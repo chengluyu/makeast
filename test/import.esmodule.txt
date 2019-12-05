@@ -1,0 +1,9 @@
+import "test";
+
+import Test from "test";
+
+import { Foo, Bar } from "foobar";
+
+import { Hello as World } from "example";
+
+import * as everything from "world";

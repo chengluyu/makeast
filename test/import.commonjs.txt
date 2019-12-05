@@ -1,0 +1,10 @@
+require("test");
+
+const Test = require("test");
+
+const { Foo, Bar } = require("foobar");
+
+const _example = require("example");
+const World = _example.Hello;
+
+const everything = require("world");
