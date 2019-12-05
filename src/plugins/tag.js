@@ -13,7 +13,10 @@ module.exports = {
       if (t.kind === "node") {
         t.decls.unshift({
           kind: "prop",
-          attributes: { readonly: options.readonly },
+          attributes: {
+            readonly: options.readonly,
+            factory: { hideFromParameters: true, defaultValue: `${enumTypeName}.${t.name}` },
+          },
           decorators: [],
           name: propName,
           type: `${enumTypeName}.${t.name}`,

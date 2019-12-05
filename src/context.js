@@ -9,6 +9,7 @@ function isApplicable(d, t) {
 const defaultOptions = {
   treatEmptyTreeAsUnion: true,
   module: "esmodule", // or "commonjs"
+  language: "typescript", // or "javascript"
   style: {
     tabWidth: 2,
     useTab: false,
