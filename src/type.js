@@ -17,9 +17,6 @@ class TypeVisitor {
     if (typeof t === "string") {
       return t;
     }
-    if (typePower[t.kind] === undefined) {
-      throw new Error(`unknown type kind: ${t.kind}`);
-    }
     let s;
     const myPower = typePower[t.kind];
     if (t.kind === "union") {
@@ -27,7 +24,7 @@ class TypeVisitor {
     } else if (t.kind === "array") {
       s = `${this.visitType(t.element, myPower)}[]`;
     } else if (t.kind === "optional") {
-      s = `${this.visitType(t.element, myPower)} | null`;
+      s = `${this.visitType(t.type, myPower)} | null`;
     } else if (t.kind === "tuple") {
       s = `[${t.elements.map(this.visitType).join(", ")}]`;
     } else if (t.kind === "function") {
