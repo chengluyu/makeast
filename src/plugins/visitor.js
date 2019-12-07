@@ -1,19 +1,19 @@
 const { separateProps, flattenLines, commonJSify } = require("../utils");
 
-function makeTypeScriptVisitorClass(visitorClassName, rootType, nodeTypes, enumType) {
+function makeTypeScriptVisitorClass(visitorClassName, nodeTypes, enumInfo, rootType) {
   return [
     `export abstract class ${visitorClassName}<T> {`,
     ...nodeTypes.map(t => `abstract visit${t}(t: ${t}): T;`),
     [
       `public visit(t: ${rootType}): T {`,
-      ["switch (t.kind) {", nodeTypes.map(t => `case ${enumType}.${t}`), "}"],
+      [`switch (t.${enumInfo.property}) {`, nodeTypes.map(t => `case ${enumInfo.type}.${t}`), "}"],
       "}",
     ],
     "}",
   ];
 }
 
-function makeJavaScriptVisitorClass(visitorClassName, enumType, nodeTypes) {
+function makeJavaScriptVisitorClass(visitorClassName, nodeTypes, enumInfo) {
   return [
     `class ${visitorClassName} {`,
     ...nodeTypes.map(t => [
@@ -24,8 +24,12 @@ function makeJavaScriptVisitorClass(visitorClassName, enumType, nodeTypes) {
     [
       `visit(t) {`,
       [
-        "switch (t.kind) {",
-        nodeTypes.flatMap(t => [`case ${enumType}.${t}:`, [`this.visit${t}(t);`, "break;"]]),
+        `switch (t.${enumInfo.property}) {`,
+        nodeTypes.flatMap(t => [`case ${enumInfo.type}.${t}:`, [`this.visit${t}(t);`, "break;"]]),
+        [
+          "default:",
+          [`throw new Error(\`unknown ${enumInfo.property} "\${t.${enumInfo.property}}"\`);`],
+        ],
         "}",
       ],
       "}",
@@ -39,7 +43,7 @@ module.exports = {
   applicable: "tree",
   // This decorator is aiming to modify the node.
   target: "node",
-  handler(visitorClassName, enumTypeName) {
+  handler(visitorClassName) {
     const nodeTypes = [];
 
     let traverse = function(t) {
@@ -56,11 +60,16 @@ module.exports = {
     };
 
     return function(root) {
+      const tagDecorator = root.decorators.find(x => x.name === "tag");
+      if (tagDecorator === undefined) {
+        throw new Error("to use the visitor decorator, you must apply a tag decorator before it");
+      }
+      const enumInfo = { type: tagDecorator.args[1], property: tagDecorator.args[0] };
       traverse = traverse.bind(this);
       traverse(root);
       const lines = (this.options.language === "typescript"
         ? makeTypeScriptVisitorClass
-        : makeJavaScriptVisitorClass)(visitorClassName, root.name, nodeTypes, enumTypeName);
+        : makeJavaScriptVisitorClass)(visitorClassName, nodeTypes, enumInfo, root.name);
       this.results.push({
         type: "source",
         source: commonJSify(
