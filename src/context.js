@@ -15,6 +15,7 @@ const defaultOptions = {
     useTab: false,
     printWidth: 120,
     blockDelimiter: "\n\n",
+    insertFinalNewLine: true,
   },
 };
 
@@ -91,6 +92,10 @@ module.exports = class Context {
         throw new Error(`unknown block type ${t.type}`);
       }
     }
-    return blocks.join(this.options.style.blockDelimiter);
+    let text = blocks.join(this.options.style.blockDelimiter);
+    if (!text.endsWith("\n")) {
+      text += "\n";
+    }
+    return text;
   }
 };
