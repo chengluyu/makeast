@@ -89,8 +89,15 @@ module.exports = {
     return function(root) {
       traverse = traverse.bind(this);
       traverse(root);
-      const first = `export class ${factoryClassName} {`;
-      const last = "}";
+      let first;
+      let last;
+      if (this.options.module === "esmodule") {
+        first = `export class ${factoryClassName} {`;
+        last = "}";
+      } else {
+        first = `class ${factoryClassName} {`;
+        last = `}\nmodule.exports.${factoryClassName} = ${factoryClassName};`;
+      }
       this.results.push({
         type: "source",
         source:
