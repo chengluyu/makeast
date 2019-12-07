@@ -1,5 +1,6 @@
 @tag("kind", "SyntaxTreeKind")
 @factory("SyntaxTreeFactory")
+@visitor("SyntaxTreeVisitor", "SyntaxTreeKind")
 tree SyntaxTreeNode {
   node Token {
     #readonly text: string

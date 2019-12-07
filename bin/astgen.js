@@ -48,6 +48,7 @@ function main() {
   transpiler.registerDecorator("import", require("../src/plugins/import"));
   transpiler.registerDecorator("interface", require("../src/plugins/interface"));
   transpiler.registerDecorator("tag", require("../src/plugins/tag"));
+  transpiler.registerDecorator("visitor", require("../src/plugins/visitor"));
 
   if (argv.language === "typescript") {
     transpiler.setDefaultDecorator("interface");

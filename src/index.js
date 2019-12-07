@@ -6,6 +6,7 @@ shared.registerDecorator("factory", require("./plugins/factory"));
 shared.registerDecorator("import", require("./plugins/import"));
 shared.registerDecorator("interface", require("./plugins/interface"));
 shared.registerDecorator("tag", require("./plugins/tag"));
+shared.registerDecorator("visitor", require("./plugins/visitor"));
 
 shared.setDefaultDecorator("import");
 shared.setDefaultDecorator("interface");
