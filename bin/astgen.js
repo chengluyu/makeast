@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const { parse } = require("../src/parser");
 const Context = require("../src/context");
 
@@ -17,6 +18,10 @@ function main() {
     .option("language", {
       alias: "l",
       default: "typescript",
+    })
+    .option("output", {
+      alias: "o",
+      default: null,
     }).argv;
 
   if (argv.module !== "esmodule" && argv.module !== "commonjs") {
@@ -63,7 +68,25 @@ function main() {
     return;
   }
   tree.decls.forEach(d => transpiler.traverse(d));
-  console.log(transpiler.assemble());
+
+  const output = transpiler.assemble();
+  if (argv.output === "stdout") {
+    console.log(output);
+  } else {
+    let outputPath;
+    if (argv.output === null) {
+      const { dir, name } = path.parse(argv._[0]);
+      outputPath = path.join(dir, `${name}.${argv.language === "typescript" ? "ts" : "js"}`);
+    } else {
+      outputPath = argv.output;
+    }
+    try {
+      fs.writeFileSync(outputPath, output);
+      console.log(`Output had been written to ${outputPath}`);
+    } catch (e) {
+      console.log(`Error in save the output: ${e.message}`);
+    }
+  }
 }
 
 main();
