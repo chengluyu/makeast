@@ -1,3 +1,24 @@
+function makeTypeScriptEnum(typeName, members) {
+  const first = `export enum ${typeName} {`;
+  const last = "}";
+  return members.length === 0
+    ? first + last
+    : [first, ...members.map(x => `  ${x},`), last].join("\n");
+}
+
+function makeJavaScriptEnum(typeName, members, options) {
+  let prologue = `let ${typeName};\n(function (e) {`;
+  let epilogue = `})(${typeName} || (${typeName} = {}));`;
+  if (options.module === "esmodule") {
+    prologue = `export ${prologue}`;
+  } else {
+    epilogue += `\nmodule.exports.${typeName} = ${typeName};`;
+  }
+  return [prologue, ...members.map((x, i) => `  e[e["${x}"] = ${i}] = "${x}";`), epilogue].join(
+    "\n"
+  );
+}
+
 module.exports = {
   // This decorator is only applicable to tree declarations.
   applicable: "tree",
@@ -29,14 +50,13 @@ module.exports = {
     // If you'll use the context, you can't use arrow function.
     return function(root) {
       traverse(root);
-      const first = `export enum ${enumTypeName} {`;
-      const last = "}";
       this.results.push({
         type: "source",
-        source:
-          nodeNames.length === 0
-            ? first + last
-            : [first, ...nodeNames.map(x => `  ${x},`), last].join("\n"),
+        source: (this.options === "typescript" ? makeTypeScriptEnum : makeJavaScriptEnum)(
+          enumTypeName,
+          nodeNames,
+          this.options
+        ),
       });
     };
   },
