@@ -1,21 +1,18 @@
+const { flattenLines } = require("../utils");
+
 function makeTypeScriptEnum(typeName, members) {
-  const first = `export enum ${typeName} {`;
-  const last = "}";
-  return members.length === 0
-    ? first + last
-    : [first, ...members.map(x => `  ${x},`), last].join("\n");
+  return flattenLines([`export enum ${typeName} {`, members.map(x => `  ${x},`), "}"], "  ");
 }
 
-function makeJavaScriptEnum(typeName, members, options) {
-  let prologue = `let ${typeName};\n(function (e) {`;
-  let epilogue = `})(${typeName} || (${typeName} = {}));`;
-  if (options.module === "esmodule") {
-    prologue = `export ${prologue}`;
-  } else {
-    epilogue += `\nmodule.exports.${typeName} = ${typeName};`;
-  }
-  return [prologue, ...members.map((x, i) => `  e[e["${x}"] = ${i}] = "${x}";`), epilogue].join(
-    "\n"
+function makeJavaScriptEnum(typeName, members, { module }) {
+  return flattenLines(
+    [
+      `${module === "esmodule" ? "export " : ""}const ${typeName} = {`,
+      members.map((x, i) => `${x}: ${i},`),
+      members.map((x, i) => `${i}: "${x}",`),
+      `};${module === "commonjs" ? `\nmodule.exports.${typeName} = ${typeName};` : ""}`,
+    ],
+    "  "
   );
 }
 
