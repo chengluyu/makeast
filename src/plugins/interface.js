@@ -1,5 +1,5 @@
 const TypeVisitor = require("../type");
-const { separateProps } = require("../utils");
+const { separateProps, flattenLines } = require("../utils");
 
 class InterfaceGenerator {
   constructor(context) {
@@ -50,10 +50,11 @@ class InterfaceGenerator {
 
   visitUnion(t) {
     t.decls.forEach(this.visit);
-    this.context.results.push({
-      type: "source",
-      source: `type ${t.name} = ${t.decls.map(u => u.name).join(" | ")};`,
-    });
+    let source = `type ${t.name} = ${t.decls.map(u => u.name).join(" | ")};`;
+    if (source.length > this.context.options.style.printWidth) {
+      source = flattenLines([`type ${t.name} =`, t.decls.map(u => `| ${u.name}`)], "  ") + ";";
+    }
+    this.context.results.push({ type: "source", source });
   }
 
   visitProp(t) {
