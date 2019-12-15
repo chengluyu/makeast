@@ -37,7 +37,7 @@ function generateFactoryMethod(t, inheritedProps) {
       ? `  public ${signature}: ${t.name} {`
       : `  ${signature} {`;
   if (firstLine.length > this.options.style.printWidth) {
-    firstLine = [`  public create${t.name}(`, ...parameters.map(x => `    ${x}`), "  ) {"].join(
+    firstLine = [`  public create${t.name}(`, ...parameters.map(x => `    ${x},`), "  ) {"].join(
       "\n"
     );
   }

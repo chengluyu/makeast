@@ -2,11 +2,15 @@ const { separateProps, flattenLines, commonJSify } = require("../utils");
 
 function makeTypeScriptVisitorClass(visitorClassName, nodeTypes, enumInfo, rootType) {
   return [
-    `export abstract class ${visitorClassName}<T> {`,
-    ...nodeTypes.map(t => `abstract visit${t}(t: ${t}): T;`),
+    `abstract class ${visitorClassName}<T> {`,
+    nodeTypes.map(t => `abstract visit${t}(t: ${t}): T;`),
     [
       `public visit(t: ${rootType}): T {`,
-      [`switch (t.${enumInfo.property}) {`, nodeTypes.map(t => `case ${enumInfo.type}.${t}`), "}"],
+      [
+        `switch (t.${enumInfo.property}) {`,
+        nodeTypes.flatMap(t => [`case ${enumInfo.type}.${t}:`, [`return this.visit${t}(t);`]]),
+        "}",
+      ],
       "}",
     ],
     "}",
@@ -25,7 +29,7 @@ function makeJavaScriptVisitorClass(visitorClassName, nodeTypes, enumInfo) {
       `visit(t) {`,
       [
         `switch (t.${enumInfo.property}) {`,
-        nodeTypes.flatMap(t => [`case ${enumInfo.type}.${t}:`, [`this.visit${t}(t);`, "break;"]]),
+        nodeTypes.flatMap(t => [`case ${enumInfo.type}.${t}:`, [`return this.visit${t}(t);`]]),
         [
           "default:",
           [`throw new Error(\`unknown ${enumInfo.property} "\${t.${enumInfo.property}}"\`);`],

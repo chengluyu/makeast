@@ -1,7 +1,7 @@
 const { flattenLines } = require("../utils");
 
 function makeTypeScriptEnum(typeName, members) {
-  return flattenLines([`export enum ${typeName} {`, members.map(x => `  ${x},`), "}"], "  ");
+  return flattenLines([`export enum ${typeName} {`, ...members.map(x => `  ${x},`), "}"], "  ");
 }
 
 function makeJavaScriptEnum(typeName, members, { module }) {
@@ -49,7 +49,7 @@ module.exports = {
       traverse(root);
       this.results.push({
         type: "source",
-        source: (this.options === "typescript" ? makeTypeScriptEnum : makeJavaScriptEnum)(
+        source: (this.options.language === "typescript" ? makeTypeScriptEnum : makeJavaScriptEnum)(
           enumTypeName,
           nodeNames,
           this.options
