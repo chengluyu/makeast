@@ -1,7 +1,7 @@
 {
   "name": "astgen",
   "version": "0.0.1",
-  "description": "A general JavaScript/TypeScript abstract syntax tree generation.",
+  "description": "A general JavaScript/TypeScript abstract syntax tree generator.",
   "main": "index.js",
   "scripts": {
     "test": "node scripts/compile && jest"
