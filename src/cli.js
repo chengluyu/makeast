@@ -1,7 +1,8 @@
+#!/usr/bin/env node
 const fs = require("fs");
 const path = require("path");
-const { parse } = require("../src/parser");
-const Context = require("../src/context");
+const { parse } = require("./parser");
+const Context = require("./context");
 
 function buildErrorMessage(e) {
   return e.location !== undefined
@@ -44,11 +45,11 @@ function main() {
       tabWidth: argv.tabWidth,
     },
   });
-  transpiler.registerDecorator("factory", require("../src/plugins/factory"));
-  transpiler.registerDecorator("import", require("../src/plugins/import"));
-  transpiler.registerDecorator("interface", require("../src/plugins/interface"));
-  transpiler.registerDecorator("tag", require("../src/plugins/tag"));
-  transpiler.registerDecorator("visitor", require("../src/plugins/visitor"));
+  transpiler.registerDecorator("factory", require("./plugins/factory"));
+  transpiler.registerDecorator("import", require("./plugins/import"));
+  transpiler.registerDecorator("interface", require("./plugins/interface"));
+  transpiler.registerDecorator("tag", require("./plugins/tag"));
+  transpiler.registerDecorator("visitor", require("./plugins/visitor"));
 
   if (argv.language === "typescript") {
     transpiler.setDefaultDecorator("interface");
