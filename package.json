@@ -1,5 +1,5 @@
 {
-  "name": "astgen",
+  "name": "makeast",
   "version": "0.0.1",
   "description": "A general JavaScript/TypeScript abstract syntax tree generator.",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chengluyu/astgen.git"
+    "url": "git+https://github.com/chengluyu/makeast.git"
   },
   "keywords": [
     "parser",
@@ -18,9 +18,9 @@
   "author": "Luyu Cheng",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chengluyu/astgen/issues"
+    "url": "https://github.com/chengluyu/makeast/issues"
   },
-  "homepage": "https://github.com/chengluyu/astgen#readme",
+  "homepage": "https://github.com/chengluyu/makeast#readme",
   "devDependencies": {
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^6.7.0",

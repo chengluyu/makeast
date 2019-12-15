@@ -1,8 +1,8 @@
-# Astgen <img align="right" src="docs/logo.svg" height="38"></img>
+# Makeast
 
-Astgen is a transpiler that helps you quickly generate abstract syntax tree classes and interfaces in JavaScript/TypeScript.
+Makeast is a transpiler that helps you quickly generate abstract syntax tree classes and interfaces in JavaScript/TypeScript.
 
-## Why Use Astgen
+## Why Use Makeast
 
 * Quickly generate usable classes and interfaces.
 * Fast prototype your idea when building parsers.
@@ -41,7 +41,7 @@ Take a closer look of the description above.
 * The keyword `tree` indicate a container for one or more nodes and trees. It will be transpiled into an union type of all sub nodes.
 * The decorator `@tag("kind", "SyntaxTreeKind")` means generate an enum named `SyntaxTreeNode` together with the tree and every node inside the tree will be included as an enum constant.
 
-Astgen will generate following TypeScript interfaces and enums for you.
+Makeast will generate following TypeScript interfaces and enums for you.
 
 ```typescript
 export enum SyntaxTreeKind {
