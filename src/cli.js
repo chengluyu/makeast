@@ -23,6 +23,10 @@ function main() {
     .option("output", {
       alias: "o",
       default: null,
+    })
+    .option("print-width", {
+      alias: "p",
+      default: 120,
     }).argv;
 
   if (argv.module !== "esmodule" && argv.module !== "commonjs") {
@@ -43,6 +47,7 @@ function main() {
     language: argv.language,
     style: {
       tabWidth: argv.tabWidth,
+      printWidth: argv["print-width"],
     },
   });
   transpiler.registerDecorator("factory", require("./plugins/factory"));
