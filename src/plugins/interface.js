@@ -50,9 +50,10 @@ class InterfaceGenerator {
 
   visitUnion(t) {
     t.decls.forEach(this.visit);
-    let source = `type ${t.name} = ${t.decls.map(u => u.name).join(" | ")};`;
+    let source = `export type ${t.name} = ${t.decls.map(u => u.name).join(" | ")};`;
     if (source.length > this.context.options.style.printWidth) {
-      source = flattenLines([`type ${t.name} =`, t.decls.map(u => `| ${u.name}`)], "  ") + ";";
+      source =
+        flattenLines([`export type ${t.name} =`, t.decls.map(u => `| ${u.name}`)], "  ") + ";";
     }
     this.context.results.push({ type: "source", source });
   }

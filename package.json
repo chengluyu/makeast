@@ -1,6 +1,6 @@
 {
   "name": "makeast",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A general JavaScript/TypeScript abstract syntax tree generator.",
   "main": "index.js",
   "files": [
