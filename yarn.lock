@@ -2979,6 +2979,14 @@ path-type@^3.0.0:
   dependencies:
     pify "^3.0.0"
 
+pegjs-make@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/pegjs-make/-/pegjs-make-0.0.3.tgz#eeaed4f30401106dd104bd8ae81fc9e623b74a11"
+  integrity sha512-uBLHCbjSzMFjBeWq+uUcWRwnlyrgB+Xv2sROarUubePEODehv9GkN0p1LkqWULHxjeXxaGWGOiFCkrOkhj7KCg==
+  dependencies:
+    pegjs "^0.10.0"
+    yargs "^15.0.2"
+
 pegjs@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
