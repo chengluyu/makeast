@@ -6,7 +6,7 @@ const typeVisitor = new TypeVisitor({ visitNode() {} });
 function generateFactoryMethod(t, inheritedProps) {
   // properties = inherited - overrided + own
   const ownProps = new Set(t.decls.map(x => x.name));
-  inheritedProps = inheritedProps.filter(x => ownProps.has(x.name));
+  inheritedProps = inheritedProps.filter(x => !ownProps.has(x.name));
   const propsToCollect = inheritedProps.concat(t.decls);
   // Collect parameters and constructors
   const parameters = [];
@@ -62,7 +62,7 @@ module.exports = {
     const inheritedProps = [];
 
     function push(props) {
-      lengthStack.push(inheritedProps.length);
+      lengthStack.push(props.length);
       inheritedProps.push(...props);
     }
 
