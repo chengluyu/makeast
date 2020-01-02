@@ -46,6 +46,18 @@ module.exports = {
 
     // If you'll use the context, you can't use arrow function.
     return function(root) {
+      if (root.kind === "tree" && root.decls.find(x => x.kind === "prop") !== undefined) {
+        root.decls.unshift({
+          kind: "prop",
+          attributes: {
+            readonly: options.readonly,
+            factory: { hideFromParameters: true, defaultValue: `${enumTypeName}` },
+          },
+          decorators: [],
+          name: propName,
+          type: `${enumTypeName}`,
+        });
+      }
       traverse(root);
       this.results.push({
         type: "source",
