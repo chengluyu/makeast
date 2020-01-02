@@ -1,6 +1,6 @@
 const { separateProps, flattenLines, commonJSify } = require("../utils");
 
-function makeTypeScriptVisitorClass(visitorClassName, nodeTypes, enumInfo, rootType) {
+function makeTypeScriptVisitorClass(visitorClassName, nodeTypes, enumInfo, rootType, options) {
   return [
     `abstract class ${visitorClassName}<T> {`,
     nodeTypes.map(t => `abstract visit${t}(t: ${t}): T;`),
@@ -8,7 +8,18 @@ function makeTypeScriptVisitorClass(visitorClassName, nodeTypes, enumInfo, rootT
       `public visit(t: ${rootType}): T {`,
       [
         `switch (t.${enumInfo.property}) {`,
-        nodeTypes.flatMap(t => [`case ${enumInfo.type}.${t}:`, [`return this.visit${t}(t);`]]),
+        nodeTypes.flatMap(t => [
+          `case ${enumInfo.type}.${t}:`,
+          [`return this.visit${t}(t${options.forciblyConversion ? ` as ${t}` : ""});`],
+        ]),
+        options.includeDefault
+          ? [
+              "default:",
+              [
+                `throw new Error(\`unrecognized ${enumInfo.property}: \${t.${enumInfo.property}}\`);`,
+              ],
+            ]
+          : [],
         "}",
       ],
       "}",
@@ -47,7 +58,7 @@ module.exports = {
   applicable: "tree",
   // This decorator is aiming to modify the node.
   target: "node",
-  handler(visitorClassName) {
+  handler(visitorClassName, options) {
     const nodeTypes = [];
 
     let traverse = function(t) {
@@ -73,7 +84,7 @@ module.exports = {
       traverse(root);
       const lines = (this.options.language === "typescript"
         ? makeTypeScriptVisitorClass
-        : makeJavaScriptVisitorClass)(visitorClassName, nodeTypes, enumInfo, root.name);
+        : makeJavaScriptVisitorClass)(visitorClassName, nodeTypes, enumInfo, root.name, options);
       this.results.push({
         type: "source",
         source: commonJSify(
