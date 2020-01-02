@@ -12,7 +12,8 @@ function generateFactoryMethod(t, inheritedProps) {
   const parameters = [];
   const constructors = [];
   for (const d of propsToCollect) {
-    const { hideFromParameters, parameterName, defaultValue } = d.attributes.factory || {};
+    const { hideFromParameters, parameterName, parameterType, defaultValue, initializer } =
+      d.attributes.factory || {};
     if (hideFromParameters) {
       constructors.push(
         `${d.name}: ${typeof defaultValue === "string" ? defaultValue : "undefined"}`
@@ -20,11 +21,15 @@ function generateFactoryMethod(t, inheritedProps) {
     } else {
       parameters.push(
         `${parameterName || d.name}` +
-          (this.options.language === "typescript" ? `: ${typeVisitor.visitType(d.type)}` : "") +
+          (this.options.language === "typescript"
+            ? `: ${parameterType || typeVisitor.visitType(d.type)}`
+            : "") +
           (typeof defaultValue === "string" ? ` = ${defaultValue}` : "")
       );
       constructors.push(
-        typeof parameterName === "string" && parameterName !== d.name
+        typeof initializer === "string"
+          ? `${d.name}: ${initializer}`
+          : typeof parameterName === "string" && parameterName !== d.name
           ? `${d.name}: ${parameterName}`
           : d.name
       );
@@ -45,7 +50,7 @@ function generateFactoryMethod(t, inheritedProps) {
   }
   let body = `    return ${braceList(constructors)};`;
   if (body.length > this.options.style.printWidth) {
-    body = ["    return {", ...constructors.map(x => `      ${x}`), "    };"].join("\n");
+    body = ["    return {", ...constructors.map(x => `      ${x},`), "    };"].join("\n");
   }
   const lastLine = "  }";
   return [firstLine, body, lastLine].join("\n");
