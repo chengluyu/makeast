@@ -75,11 +75,19 @@ module.exports = {
     };
 
     return function(root) {
-      const tagDecorator = root.decorators.find(x => x.name === "tag");
-      if (tagDecorator === undefined) {
-        throw new Error("to use the visitor decorator, you must apply a tag decorator before it");
+      let enumInfo;
+      if (
+        typeof options.enumPropertyName === "string" &&
+        typeof options.enumTypeName === "string"
+      ) {
+        enumInfo = { type: options.enumTypeName, property: options.enumPropertyName };
+      } else {
+        const tagDecorator = root.decorators.find(x => x.name === "tag");
+        if (tagDecorator === undefined) {
+          throw new Error("to use the visitor decorator, you must apply a tag decorator before it");
+        }
+        enumInfo = { type: tagDecorator.args[1], property: tagDecorator.args[0] };
       }
-      const enumInfo = { type: tagDecorator.args[1], property: tagDecorator.args[0] };
       traverse = traverse.bind(this);
       traverse(root);
       const lines = (this.options.language === "typescript"
