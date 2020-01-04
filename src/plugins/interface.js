@@ -28,7 +28,8 @@ class InterfaceGenerator {
       // Treat as union if the tree doesn't have own properties
       this.visitUnion({ name: t.name, decls: nonProps });
     } else {
-      this.visitNode({ name: t.name, decls: props });
+      // TODO: fix incomplete node here
+      this.visitNode({ name: t.name, decls: props, attributes: {} });
       this.treeStack.unshift(t.name);
       nonProps.forEach(this.visit);
       this.treeStack.shift();
@@ -39,6 +40,9 @@ class InterfaceGenerator {
     const extendsClause = this.treeStack.length === 0 ? "" : `extends ${this.treeStack[0]} `;
     const first = `export interface ${t.name} ${extendsClause}{`;
     const last = "}";
+    if (t.attributes.dummy) {
+      return;
+    }
     this.context.results.push({
       type: "source",
       source:

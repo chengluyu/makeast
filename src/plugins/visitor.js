@@ -63,6 +63,9 @@ module.exports = {
 
     let traverse = function(t) {
       if (t.kind === "node") {
+        if (t.attributes.dummy) {
+          return;
+        }
         nodeTypes.push(t.name);
       } else if (t.kind === "tree") {
         const [, nonProps] = separateProps(t.decls);

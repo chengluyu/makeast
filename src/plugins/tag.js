@@ -29,6 +29,9 @@ module.exports = {
         return;
       }
       if (t.kind === "node") {
+        if (t.attributes.dummy) {
+          return;
+        }
         t.decls.unshift({
           kind: "prop",
           attributes: {
